@@ -1,0 +1,51 @@
+{
+  "components": [
+    {
+      "text": "# Verify Request",
+      "type": "text",
+      "layout": {
+        "row": "Row_0hbo8ph",
+        "columns": null
+      },
+      "id": "Field_1mn7c46"
+    },
+    {
+      "label": "Wage",
+      "type": "number",
+      "layout": {
+        "row": "Row_0fa0paw",
+        "columns": null
+      },
+      "id": "Field_0zpajmu",
+      "key": "wage",
+      "readonly": false,
+      "properties": {},
+      "appearance": {
+        "prefixAdorner": "$"
+      },
+      "serializeToString": false
+    },
+    {
+      "subtype": "date",
+      "dateLabel": "Date",
+      "type": "datetime",
+      "layout": {
+        "row": "Row_0c5rhn5",
+        "columns": null
+      },
+      "id": "Field_1c0wj1d",
+      "key": "requestDate",
+      "readonly": true,
+      "properties": {}
+    }
+  ],
+  "type": "default",
+  "id": "Form_verifyRequest",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.3.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.32.0"
+  },
+  "schemaVersion": 18
+}

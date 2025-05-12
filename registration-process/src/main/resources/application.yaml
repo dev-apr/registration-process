@@ -1,0 +1,71 @@
+# https://github.com/camunda-community-hub/spring-zeebe#configuring-camunda-platform-8-saas-connection
+# https://github.com/camunda-community-hub/spring-zeebe#additional-configuration-options
+
+camunda:
+  client:
+    mode: selfmanaged
+    gateway-address: "localhost:26500"
+
+# go to http://localhost:8084/applications/ and create application of type M2M with read/write access to Operate & Tasklist
+identity:
+  clientId: camunda-app
+  clientSecret: tI4bSYrju97cT1T1eEmoFyjug8hRMPft
+keycloakUrl: http://localhost:18080/auth/realms/camunda-platform/protocol/openid-connect/token
+keycloak:
+  admin:
+    url: http://localhost:18080/auth/admin/realms/camunda-platform
+
+tasklistUrl: http://localhost:8082
+operateUrl: http://localhost:8081
+
+# this is to allow react application launched separately to access the WS
+websocket:
+  allowedOrigin: "*"
+
+springdoc.swagger-ui.path: /swagger-ui.html
+
+spring:
+  servlet.multipart:
+    max-file-size: 10MB
+    max-request-size: 30MB
+
+  security:
+    oauth2:
+      # enabled: true
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:18080/auth/realms/camunda-platform
+          jwk-set-uri: http://localhost:18080/auth/realms/camunda-platform/protocol/openid-connect/certs
+      client:
+        registration:
+          keycloak:
+            client-id: camunda-app
+            client-secret: tI4bSYrju97cT1T1eEmoFyjug8hRMPft
+            authorization-grant-type: password
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:18080/realms/camunda-platform
+
+  # CORS configuration
+  web:
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
+      allow-credentials: false
+      max-age: 3600
+
+server:
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1048576
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG

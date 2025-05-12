@@ -1,0 +1,81 @@
+{
+  "components": [
+    {
+      "text": "# Financial Controller Action",
+      "type": "text",
+      "layout": {
+        "row": "Row_02q8e5v",
+        "columns": null
+      },
+      "id": "Field_1mn7c46"
+    },
+    {
+      "label": "Wage",
+      "type": "number",
+      "layout": {
+        "row": "Row_0fa0paw",
+        "columns": null
+      },
+      "id": "Field_0zpajmu",
+      "key": "wage",
+      "readonly": true,
+      "properties": {},
+      "appearance": {
+        "prefixAdorner": "$"
+      }
+    },
+    {
+      "subtype": "date",
+      "dateLabel": "Date",
+      "type": "datetime",
+      "layout": {
+        "row": "Row_0c5rhn5",
+        "columns": null
+      },
+      "id": "Field_1c0wj1d",
+      "key": "requestDate",
+      "readonly": true
+    },
+    {
+      "label": "Comments",
+      "type": "textarea",
+      "layout": {
+        "row": "Row_076vz4r",
+        "columns": null
+      },
+      "id": "Field_13h8eaa",
+      "key": "comments",
+      "readonly": true
+    },
+    {
+      "label": "",
+      "values": [
+        {
+          "label": "Approve",
+          "value": "approved"
+        },
+        {
+          "label": "Return",
+          "value": "returned"
+        }
+      ],
+      "type": "radio",
+      "layout": {
+        "row": "Row_01myslt",
+        "columns": null
+      },
+      "id": "Field_1llv9ki",
+      "key": "actionPerformed",
+      "defaultValue": "approved"
+    }
+  ],
+  "type": "default",
+  "id": "Form_verifyRequest",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.3.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.32.0"
+  },
+  "schemaVersion": 18
+}
