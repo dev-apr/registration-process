@@ -1,6 +1,8 @@
 # https://github.com/camunda-community-hub/spring-zeebe#configuring-camunda-platform-8-saas-connection
 # https://github.com/camunda-community-hub/spring-zeebe#additional-configuration-options
 
+
+
 camunda:
   client:
     mode: selfmanaged
@@ -9,11 +11,24 @@ camunda:
 # go to http://localhost:8084/applications/ and create application of type M2M with read/write access to Operate & Tasklist
 identity:
   clientId: camunda-app
-  clientSecret: tI4bSYrju97cT1T1eEmoFyjug8hRMPft
+  clientSecret: gW9KIdJPCgRhzRpraJHEF9YTvk4urw6z
 keycloakUrl: http://localhost:18080/auth/realms/camunda-platform/protocol/openid-connect/token
 keycloak:
+  url: http://localhost:18080/auth/admin/realms/camunda-platform
   admin:
-    url: http://localhost:18080/auth/admin/realms/camunda-platform
+    url: http://localhost:18080/auth/realms/master/protocol/openid-connect/token
+    username: admin
+    password: admin
+  groups:
+    admin: d08fb26e-9e37-4b60-aab4-ac7b71ebda02
+    validator: 7dd2c4e0-b66f-4c39-9263-6ce9b4251c12
+    financial-controller: 7927b3fb-f6ab-41ae-a99d-83ae4183799e
+    c1-finance: fb0a070d-dd65-4db4-bf21-30e3bafbc83c
+    c1-head: cef3dfc0-1b2b-4d9c-88a5-123977562484
+    c1-legal: 0e957d56-fa00-4565-aab1-0423ded2611f
+    c2-finance: 3292b6e1-41b7-44e2-9620-ea99bfa0126e
+    c2-head: fd372adb-0c20-4c0a-ba87-b316d485881f
+    c2-legal: 5c7c146c-8981-46aa-87b0-48a54b32face
 
 tasklistUrl: http://localhost:8082
 operateUrl: http://localhost:8081
@@ -29,6 +44,19 @@ spring:
     max-file-size: 10MB
     max-request-size: 30MB
 
+   # Database configuration
+  datasource:
+    url: jdbc:mysql://localhost:3306/camunda_db?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: Opener123@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  
+  # Flyway configuration for database migrations
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
   security:
     oauth2:
       # enabled: true
@@ -40,7 +68,7 @@ spring:
         registration:
           keycloak:
             client-id: camunda-app
-            client-secret: tI4bSYrju97cT1T1eEmoFyjug8hRMPft
+            client-secret: gW9KIdJPCgRhzRpraJHEF9YTvk4urw6z
             authorization-grant-type: password
         provider:
           keycloak:
@@ -65,7 +93,7 @@ server:
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1048576
 
-logging:
-  level:
-    org.springframework.web: DEBUG
-    org.springframework.security: DEBUG
+# logging:
+#   level:
+#     org.springframework.web: DEBUG
+#     org.springframework.security: DEBUG

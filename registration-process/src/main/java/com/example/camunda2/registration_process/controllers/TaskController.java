@@ -27,14 +27,14 @@ public class TaskController {
     }
 
     @GetMapping("/user/{username}")
-    @PreAuthorize("hasRole('user')")
+    @PreAuthorize("hasRole('Default user role')")
     public ResponseEntity<TaskList> getTasksByUser(@PathVariable String username) throws TaskListException {
         TaskList tasks = taskService.getTasksByUser(username);
         return ResponseEntity.ok(tasks);
     }
 
     @GetMapping("/{taskId}")
-    @PreAuthorize("hasAnyRole('admin','user')")
+    @PreAuthorize("hasAnyRole('admin','Default user role')")
     public ResponseEntity<Task> getTaskById(@PathVariable String taskId) throws TaskListException {
         Task task = taskService.getTaskById(taskId);
         return ResponseEntity.ok(task);
@@ -55,7 +55,7 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}/variables")
-    @PreAuthorize("hasAnyRole('admin', 'user')")
+    @PreAuthorize("hasAnyRole('admin', 'Default user role')")
     public ResponseEntity<List> getVariablesByTask(@PathVariable String taskId) throws TaskListException {
         List variables = taskService.getVariablesByTask(taskId);
         return ResponseEntity.ok(variables);
@@ -78,14 +78,14 @@ public class TaskController {
     }
 
     @PostMapping("/{taskId}/unclaim")
-    @PreAuthorize("hasAnyRole('admin','user')")
+    @PreAuthorize("hasAnyRole('admin','Default user role')")
     public ResponseEntity<Task> unclaimTask(@PathVariable String taskId) throws TaskListException {
         Task task = taskService.unclaimTask(taskId);
         return ResponseEntity.ok(task);
     }
 
     @PostMapping("/{taskId}/complete")
-    @PreAuthorize("hasAnyRole('user','admin')")
+    @PreAuthorize("hasAnyRole('Default user role','admin')")
     public ResponseEntity<Void> completeTask(
             @PathVariable String taskId,
             @RequestBody Map<String, Object> variables) throws TaskListException {

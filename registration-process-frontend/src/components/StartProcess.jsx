@@ -22,15 +22,15 @@ export default function StartProcess() {
 
   const startProcess = async () => {
     // Validate input
-    if (!wage || isNaN(wage) || parseInt(wage) <= 0) {
-      setError('Please enter a valid wage amount (positive number)');
-      return;
-    }
+    // if (!wage || isNaN(wage) || parseInt(wage) <= 0) {
+    //   setError('Please enter a valid wage amount (positive number)');
+    //   return;
+    // }
     
-    if (!requestDate) {
-      setError('Please select a request date');
-      return;
-    }
+    // if (!requestDate) {
+    //   setError('Please select a request date');
+    //   return;
+    // }
     
     setLoading(true);
     setError('');
@@ -109,7 +109,6 @@ export default function StartProcess() {
             value={wage}
             onChange={(e) => setWage(e.target.value)}
             placeholder="Enter wage amount"
-            required
           />
         </div>
         
@@ -120,7 +119,6 @@ export default function StartProcess() {
             id="requestDate"
             value={requestDate}
             onChange={(e) => setRequestDate(e.target.value)}
-            required
           />
         </div>
         

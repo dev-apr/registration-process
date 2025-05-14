@@ -282,30 +282,29 @@
         <bpmn:flowNodeRef>Event_1uj915c</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0qt12sx</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_15upfah</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_002mg2e</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>validatorAction</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_0xsn0ir" name="Admin pool">
-        <bpmn:flowNodeRef>Activity_1h0wbeu</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_00cynme</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>adminAction</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_0k1xkie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_00cynme</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_1b6agrb">
         <bpmn:flowNodeRef>Event_1dweklk</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0d1l8y9</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0ytv1q4</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0i9x5uc</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_1j94oz8</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_0nv60h1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_0qi0u8k" name="Financial controller pool">
         <bpmn:flowNodeRef>actionPerformed</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_15ahnaq</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>financialControllerAction</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_097jszc</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_02rhs0p</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:boundaryEvent id="Event_0k1xkie" name="7 days" attachedToRef="Activity_1h0wbeu">
+    <bpmn:boundaryEvent id="Event_0k1xkie" name="7 days" attachedToRef="adminAction">
       <bpmn:outgoing>Flow_0ot2iep</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1v9xnhg">
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">=duration("P7D")</bpmn:timeDuration>
@@ -317,17 +316,10 @@
       <bpmn:outgoing>Flow_1o2vedz</bpmn:outgoing>
       <bpmn:outgoing>Flow_1rng7s5</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="Activity_00cynme" name="Activate API">
-      <bpmn:incoming>Flow_0ot2iep</bpmn:incoming>
-      <bpmn:outgoing>Flow_0x7ukgx</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="Activity_02rhs0p" name="Activate registration API">
-      <bpmn:incoming>Flow_0zj4cg5</bpmn:incoming>
-      <bpmn:outgoing>Flow_1xmqpds</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:userTask id="Activity_1h0wbeu" name="Admin action">
+    <bpmn:userTask id="adminAction" name="Admin action">
       <bpmn:extensionElements>
         <zeebe:formDefinition formKey="camunda-forms:bpmn:UserTaskForm_3831nd1" />
+        <zeebe:assignmentDefinition candidateGroups="admin" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0bl80zg</bpmn:incoming>
       <bpmn:outgoing>Flow_1owbrj4</bpmn:outgoing>
@@ -338,18 +330,18 @@
     <bpmn:sequenceFlow id="Flow_1rng7s5" name="Approved" sourceRef="actionPerformed" targetRef="Gateway_097jszc">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=actionPerformed = "approved"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:userTask id="Activity_15ahnaq" name="Financial controller action">
+    <bpmn:userTask id="financialControllerAction" name="Financial controller action">
       <bpmn:extensionElements>
         <zeebe:formDefinition formKey="camunda-forms:bpmn:UserTaskForm_07o19bb" />
+        <zeebe:assignmentDefinition candidateGroups="financial-controller" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1o2vedz</bpmn:incoming>
       <bpmn:incoming>Flow_15ovywk</bpmn:incoming>
       <bpmn:outgoing>Flow_1d32j4g</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_09130fz" sourceRef="Activity_1j94oz8" targetRef="Gateway_0i9x5uc" />
-    <bpmn:sequenceFlow id="Flow_0991nwb" sourceRef="Activity_002mg2e" targetRef="Gateway_0qt12sx" />
+    <bpmn:sequenceFlow id="Flow_0991nwb" sourceRef="validatorAction" targetRef="Gateway_0qt12sx" />
     <bpmn:sequenceFlow id="Flow_0abxuah" sourceRef="Gateway_15upfah" targetRef="Gateway_097jszc" />
-    <bpmn:sequenceFlow id="Flow_0bl80zg" sourceRef="Gateway_0d1l8y9" targetRef="Activity_1h0wbeu" />
+    <bpmn:sequenceFlow id="Flow_0bl80zg" sourceRef="Gateway_0d1l8y9" targetRef="adminAction" />
     <bpmn:sequenceFlow id="Flow_0ot2iep" sourceRef="Event_0k1xkie" targetRef="Activity_00cynme" />
     <bpmn:sequenceFlow id="Flow_0p9rhdz" sourceRef="Gateway_0qt12sx" targetRef="Gateway_15upfah">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=validateRequest = "approved"</bpmn:conditionExpression>
@@ -357,10 +349,10 @@
     <bpmn:sequenceFlow id="Flow_0wy3ur8" sourceRef="Gateway_0ytv1q4" targetRef="Event_1dweklk" />
     <bpmn:sequenceFlow id="Flow_0x7ukgx" sourceRef="Activity_00cynme" targetRef="Gateway_0ytv1q4" />
     <bpmn:sequenceFlow id="Flow_0zj4cg5" sourceRef="Gateway_097jszc" targetRef="Activity_02rhs0p" />
-    <bpmn:sequenceFlow id="Flow_1beljhd" sourceRef="StartEvent_1" targetRef="Activity_1j94oz8" />
-    <bpmn:sequenceFlow id="Flow_1d32j4g" sourceRef="Activity_15ahnaq" targetRef="actionPerformed" />
-    <bpmn:sequenceFlow id="Flow_1ie879a" sourceRef="Gateway_0i9x5uc" targetRef="Activity_002mg2e" />
-    <bpmn:sequenceFlow id="Flow_1owbrj4" sourceRef="Activity_1h0wbeu" targetRef="Activity_002mg2e" />
+    <bpmn:sequenceFlow id="Flow_1beljhd" sourceRef="StartEvent_1" targetRef="Gateway_0i9x5uc" />
+    <bpmn:sequenceFlow id="Flow_1d32j4g" sourceRef="financialControllerAction" targetRef="actionPerformed" />
+    <bpmn:sequenceFlow id="Flow_1ie879a" sourceRef="Gateway_0i9x5uc" targetRef="validatorAction" />
+    <bpmn:sequenceFlow id="Flow_1owbrj4" sourceRef="adminAction" targetRef="validatorAction" />
     <bpmn:sequenceFlow id="Flow_1xmqpds" sourceRef="Activity_02rhs0p" targetRef="Gateway_0ytv1q4" />
     <bpmn:exclusiveGateway id="Gateway_097jszc">
       <bpmn:incoming>Flow_1rng7s5</bpmn:incoming>
@@ -383,9 +375,6 @@
       <bpmn:outgoing>Flow_15ovywk</bpmn:outgoing>
       <bpmn:outgoing>Flow_0abxuah</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:startEvent id="StartEvent_1" name="Message received">
-      <bpmn:outgoing>Flow_1beljhd</bpmn:outgoing>
-    </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_16qvrgs" name="Reject" sourceRef="Gateway_0qt12sx" targetRef="Event_1uj915c">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=validateRequest = "rejected"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -395,12 +384,13 @@
     <bpmn:endEvent id="Event_1uj915c" name="Request Rejected">
       <bpmn:incoming>Flow_16qvrgs</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1o2vedz" name="Returned" sourceRef="actionPerformed" targetRef="Activity_15ahnaq">
+    <bpmn:sequenceFlow id="Flow_1o2vedz" name="Returned" sourceRef="actionPerformed" targetRef="financialControllerAction">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=actionPerformed="returned"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:userTask id="Activity_002mg2e" name="Validator action">
+    <bpmn:userTask id="validatorAction" name="Validator action">
       <bpmn:extensionElements>
         <zeebe:formDefinition formKey="camunda-forms:bpmn:UserTaskForm_1jdieqp" />
+        <zeebe:assignmentDefinition candidateGroups="validator" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1ie879a</bpmn:incoming>
       <bpmn:incoming>Flow_1owbrj4</bpmn:incoming>
@@ -413,19 +403,12 @@
       <bpmn:outgoing>Flow_16qvrgs</bpmn:outgoing>
       <bpmn:outgoing>Flow_1emdjqz</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:userTask id="Activity_1j94oz8" name="Verify request">
-      <bpmn:extensionElements>
-        <zeebe:formDefinition formKey="camunda-forms:bpmn:UserTaskForm_2dhi1dc" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1beljhd</bpmn:incoming>
-      <bpmn:outgoing>Flow_09130fz</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gateway_0i9x5uc" name="Wage missing?" default="Flow_1ie879a">
-      <bpmn:incoming>Flow_09130fz</bpmn:incoming>
+      <bpmn:incoming>Flow_1beljhd</bpmn:incoming>
       <bpmn:outgoing>Flow_17d0dv0</bpmn:outgoing>
       <bpmn:outgoing>Flow_1ie879a</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_15ovywk" name="Yes" sourceRef="Gateway_15upfah" targetRef="Activity_15ahnaq">
+    <bpmn:sequenceFlow id="Flow_15ovywk" name="Yes" sourceRef="Gateway_15upfah" targetRef="financialControllerAction">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=date(requestDate) &lt; today()</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_17d0dv0" name="Yes" sourceRef="Gateway_0i9x5uc" targetRef="Gateway_0d1l8y9">
@@ -442,6 +425,17 @@
       <bpmn:outgoing>Flow_0vp7z4p</bpmn:outgoing>
     </bpmn:callActivity>
     <bpmn:sequenceFlow id="Flow_0vp7z4p" sourceRef="Activity_0nv60h1" targetRef="Gateway_15upfah" />
+    <bpmn:manualTask id="Activity_00cynme" name="Activate API">
+      <bpmn:incoming>Flow_0ot2iep</bpmn:incoming>
+      <bpmn:outgoing>Flow_0x7ukgx</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="Activity_02rhs0p" name="Activate registration API">
+      <bpmn:incoming>Flow_0zj4cg5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1xmqpds</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:startEvent id="StartEvent_1" name="Message received">
+      <bpmn:outgoing>Flow_1beljhd</bpmn:outgoing>
+    </bpmn:startEvent>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1m0evkk">
@@ -470,13 +464,7 @@
           <dc:Bounds x="1075" y="235" width="90" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1rsnoba_di" bpmnElement="Activity_00cynme">
-        <dc:Bounds x="1370" y="740" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1yagbrp_di" bpmnElement="Activity_02rhs0p">
-        <dc:Bounds x="1370" y="160" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_06sauvi_di" bpmnElement="Activity_1h0wbeu">
+      <bpmndi:BPMNShape id="Activity_06sauvi_di" bpmnElement="adminAction">
         <dc:Bounds x="550" y="740" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1dweklk_di" bpmnElement="Event_1dweklk">
@@ -485,7 +473,7 @@
           <dc:Bounds x="1536" y="585" width="49" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_11yo4n8_di" bpmnElement="Activity_15ahnaq">
+      <bpmndi:BPMNShape id="Activity_11yo4n8_di" bpmnElement="financialControllerAction">
         <dc:Bounds x="900" y="160" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
@@ -504,19 +492,13 @@
           <dc:Bounds x="916" y="462" width="69" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="302" y="542" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="275" y="585" width="90" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1uj915c_di" bpmnElement="Event_1uj915c">
         <dc:Bounds x="1542" y="292" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1516" y="335" width="88" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0dj1jq0_di" bpmnElement="Activity_002mg2e">
+      <bpmndi:BPMNShape id="Activity_0dj1jq0_di" bpmnElement="validatorAction">
         <dc:Bounds x="620" y="390" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
@@ -526,9 +508,6 @@
           <dc:Bounds x="739" y="403" width="82" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_07zg6mf_di" bpmnElement="Activity_1j94oz8">
-        <dc:Bounds x="410" y="520" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0i9x5uc_di" bpmnElement="Gateway_0i9x5uc" isMarkerVisible="true">
         <dc:Bounds x="575" y="535" width="50" height="50" />
         <bpmndi:BPMNLabel>
@@ -537,6 +516,18 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_184mjex_di" bpmnElement="Activity_0nv60h1">
         <dc:Bounds x="900" y="600" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ks3stm_di" bpmnElement="Activity_00cynme">
+        <dc:Bounds x="1370" y="740" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_09z4521_di" bpmnElement="Activity_02rhs0p">
+        <dc:Bounds x="1370" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="382" y="542" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="355" y="585" width="90" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0k1xkie_di" bpmnElement="Event_0k1xkie">
         <dc:Bounds x="632" y="802" width="36" height="36" />
@@ -550,10 +541,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1171" y="183" width="47" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_09130fz_di" bpmnElement="Flow_09130fz">
-        <di:waypoint x="510" y="560" />
-        <di:waypoint x="575" y="560" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0991nwb_di" bpmnElement="Flow_0991nwb">
         <di:waypoint x="720" y="430" />
@@ -591,8 +578,8 @@
         <di:waypoint x="1370" y="200" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1beljhd_di" bpmnElement="Flow_1beljhd">
-        <di:waypoint x="338" y="560" />
-        <di:waypoint x="410" y="560" />
+        <di:waypoint x="418" y="560" />
+        <di:waypoint x="575" y="560" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1d32j4g_di" bpmnElement="Flow_1d32j4g">
         <di:waypoint x="1000" y="200" />

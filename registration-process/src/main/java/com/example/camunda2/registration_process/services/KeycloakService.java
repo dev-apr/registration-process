@@ -12,7 +12,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +19,11 @@ import java.util.Map;
 @Service
 public class KeycloakService {
 
-    @Value("${keycloakUrl}")
-    private String keycloakTokenUrl;
+    @Value("${keycloak.url}")
+    private String keycloakUrl;
+    
+    @Value("${keycloak.admin.url}")
+    private String keycloakAdminTokenUrl;
 
     @Value("${identity.clientId}")
     private String clientId;
@@ -29,13 +31,14 @@ public class KeycloakService {
     @Value("${identity.clientSecret}")
     private String clientSecret;
 
-    @Value("${keycloak.admin.url:http://localhost:18080/auth/admin/realms/camunda-platform}")
-    private String keycloakAdminUrl;
+    @Value("${keycloak.admin.username}")
+    private String adminUsername;
+
+    @Value("${keycloak.admin.password}")
+    private String adminPassword;
 
     private final RestTemplate restTemplate;
     
-    // Cache to store users by group to avoid frequent API calls
-    private final Map<String, List<String>> usersByGroupCache = new HashMap<>();
     private final Map<String, Integer> currentIndexByGroup = new HashMap<>();
 
     public KeycloakService() {
@@ -46,80 +49,103 @@ public class KeycloakService {
      * Get an access token for Keycloak API calls
      */
     private String getKeycloakAccessToken() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("grant_type", "client_credentials");
-        map.add("client_id", clientId);
-        map.add("client_secret", clientSecret);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                keycloakTokenUrl,
-                request,
-                Map.class);
-
-        return (String) response.getBody().get("access_token");
+        try {
+            System.out.println("Getting Keycloak admin access token from: " + keycloakAdminTokenUrl);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    
+            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+            map.add("grant_type", "password");
+            map.add("client_id", "admin-cli");  // Use admin-cli client for admin operations
+            map.add("username", adminUsername);
+            map.add("password", adminPassword);
+    
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+    
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    keycloakAdminTokenUrl,
+                    request,
+                    Map.class);
+            
+            String token = (String) response.getBody().get("access_token");
+            System.out.println("Successfully obtained admin access token");
+            return token;
+        } catch (Exception e) {
+            System.err.println("Error getting Keycloak admin access token: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     /**
      * Get all users in a specific group
      */
     public List<String> getUsersByGroup(String groupName) {
-        // Check cache first
-        if (usersByGroupCache.containsKey(groupName)) {
-            return usersByGroupCache.get(groupName);
-        }
+    
 
         try {
+            System.out.println("Fetching users for group: " + groupName);
             String accessToken = getKeycloakAccessToken();
+            System.out.println("Got admin access token");
             
             // First, find the group ID by name
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
+            String groupsUrl = keycloakUrl + "/groups";
+            System.out.println("Fetching groups from: " + groupsUrl);
+            
             ResponseEntity<List> groupsResponse = restTemplate.exchange(
-                    keycloakAdminUrl + "/groups",
+                    groupsUrl,
                     HttpMethod.GET,
                     entity,
                     List.class);
             
+            System.out.println("Found " + (groupsResponse.getBody() != null ? groupsResponse.getBody().size() : 0) + " groups");
+            
             String groupId = null;
-            for (Object group : groupsResponse.getBody()) {
-                Map<String, Object> groupMap = (Map<String, Object>) group;
-                if (groupName.equals(groupMap.get("name"))) {
-                    groupId = (String) groupMap.get("id");
-                    break;
+            if (groupsResponse.getBody() != null) {
+                for (Object group : groupsResponse.getBody()) {
+                    Map<String, Object> groupMap = (Map<String, Object>) group;
+                    System.out.println("Group: " + groupMap.get("name") + ", ID: " + groupMap.get("id"));
+                    if (groupName.equals(groupMap.get("name"))) {
+                        groupId = (String) groupMap.get("id");
+                        break;
+                    }
                 }
             }
             
-            if (groupId == null) {
-                return new ArrayList<>();
-            }
-            
             // Now get users in this group
+            String usersUrl = keycloakUrl + "/groups/" + groupId + "/members";
+            System.out.println("Fetching users from: " + usersUrl);
+            
             ResponseEntity<List> usersResponse = restTemplate.exchange(
-                    keycloakAdminUrl + "/groups/" + groupId + "/members",
+                    usersUrl,
                     HttpMethod.GET,
                     entity,
                     List.class);
             
             List<String> users = new ArrayList<>();
-            for (Object user : usersResponse.getBody()) {
-                Map<String, Object> userMap = (Map<String, Object>) user;
-                users.add((String) userMap.get("username"));
+            if (usersResponse.getBody() != null) {
+                for (Object user : usersResponse.getBody()) {
+                    Map<String, Object> userMap = (Map<String, Object>) user;
+                    String username = (String) userMap.get("username");
+                    System.out.println("Found user: " + username);
+                    users.add(username);
+                }
             }
             
-            // Cache the result
-            usersByGroupCache.put(groupName, users);
+            System.out.println("Total users found for group " + groupName + ": " + users.size());
+            
             return users;
         } catch (Exception e) {
-            // In case of error, return a default list or empty list
+            // In case of error, print detailed error information
             System.err.println("Error fetching users from Keycloak: " + e.getMessage());
-            return new ArrayList<>();
+            e.printStackTrace();
+    
+            return null;
         }
     }
 
@@ -144,21 +170,5 @@ public class KeycloakService {
         currentIndexByGroup.put(groupName, currentIndex);
         
         return nextUser;
-    }
-    
-    /**
-     * Refresh the cache for a specific group
-     */
-    public void refreshGroupCache(String groupName) {
-        usersByGroupCache.remove(groupName);
-        getUsersByGroup(groupName);
-    }
-    
-    /**
-     * Clear all caches
-     */
-    public void clearAllCaches() {
-        usersByGroupCache.clear();
-        currentIndexByGroup.clear();
     }
 }

@@ -1,69 +1,66 @@
-package com.example.camunda2.registration_process.controllers;
+// package com.example.camunda2.registration_process.controllers;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.web.bind.annotation.*;
 
-import com.example.camunda2.registration_process.dto.TaskGroupMapping;
-import com.example.camunda2.registration_process.services.KeycloakService;
-import com.example.camunda2.registration_process.services.TaskAssignmentService;
+// import com.example.camunda2.registration_process.services.DbTaskAssignmentService;
+// import io.camunda.tasklist.exception.TaskListException;
 
-import java.util.HashMap;
-import java.util.Map;
+// import java.util.HashMap;
+// import java.util.Map;
 
-/**
- * Controller for managing task assignment configurations
- */
-@RestController
-@RequestMapping("/task-assignment")
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {})
-public class TaskAssignmentController {
+// /**
+//  * Controller for task assignment operations
+//  */
+// @RestController
+// @RequestMapping("/api/task-assignment")
+// public class TaskAssignmentController {
 
-    private final TaskAssignmentService taskAssignmentService;
-    private final KeycloakService keycloakService;
+//     private final DbTaskAssignmentService dbTaskAssignmentService;
 
-    public TaskAssignmentController(TaskAssignmentService taskAssignmentService, KeycloakService keycloakService) {
-        this.taskAssignmentService = taskAssignmentService;
-        this.keycloakService = keycloakService;
-    }
+//     @Autowired
+//     public TaskAssignmentController(DbTaskAssignmentService dbTaskAssignmentService) {
+//         this.dbTaskAssignmentService = dbTaskAssignmentService;
+//     }
 
-    /**
-     * Set a task type to group mapping
-     */
-    @PostMapping("/mapping")
-    @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<String> setTaskTypeGroupMapping(@RequestBody TaskGroupMapping mapping) {
-        taskAssignmentService.setTaskTypeGroupMapping(mapping.getTaskType(), mapping.getGroupName());
-        return ResponseEntity.ok("Task type '" + mapping.getTaskType() + "' mapped to group '" + mapping.getGroupName() + "'");
-    }
+//     /**
+//      * Assign a task using round-robin assignment based on task type
+//      */
+//     @PostMapping("/assign/{taskId}")
+//     public ResponseEntity<?> assignTask(@PathVariable String taskId) {
+//         try {
+//             dbTaskAssignmentService.assignTaskRoundRobin(taskId);
+//             Map<String, String> response = new HashMap<>();
+//             response.put("status", "success");
+//             response.put("message", "Task assigned successfully");
+//             return ResponseEntity.ok(response);
+//         } catch (TaskListException e) {
+//             Map<String, String> error = new HashMap<>();
+//             error.put("status", "error");
+//             error.put("message", e.getMessage());
+//             return ResponseEntity.badRequest().body(error);
+//         }
+//     }
 
-    /**
-     * Get the group for a task type
-     */
-    @GetMapping("/mapping/{taskType}")
-    @PreAuthorize("hasAnyRole('admin','user')")
-    public ResponseEntity<TaskGroupMapping> getGroupForTaskType(@PathVariable String taskType) {
-        String groupName = taskAssignmentService.getGroupForTaskType(taskType);
-        return ResponseEntity.ok(new TaskGroupMapping(taskType, groupName));
-    }
-
-    /**
-     * Refresh the Keycloak group cache
-     */
-    @PostMapping("/refresh-cache/{groupName}")
-    @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<String> refreshGroupCache(@PathVariable String groupName) {
-        keycloakService.refreshGroupCache(groupName);
-        return ResponseEntity.ok("Cache refreshed for group: " + groupName);
-    }
-
-    /**
-     * Clear all caches
-     */
-    @PostMapping("/clear-caches")
-    @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<String> clearAllCaches() {
-        keycloakService.clearAllCaches();
-        return ResponseEntity.ok("All caches cleared");
-    }
-}
+//     /**
+//      * Assign a task to a specific role using round-robin
+//      */
+//     @PostMapping("/assign/{taskId}/role/{role}")
+//     public ResponseEntity<?> assignTaskToRole(
+//             @PathVariable String taskId,
+//             @PathVariable String role) {
+//         try {
+//             dbTaskAssignmentService.assignTaskToRole(taskId, role);
+//             Map<String, String> response = new HashMap<>();
+//             response.put("status", "success");
+//             response.put("message", "Task assigned to role successfully");
+//             return ResponseEntity.ok(response);
+//         } catch (TaskListException e) {
+//             Map<String, String> error = new HashMap<>();
+//             error.put("status", "error");
+//             error.put("message", e.getMessage());
+//             return ResponseEntity.badRequest().body(error);
+//         }
+//     }
+// }

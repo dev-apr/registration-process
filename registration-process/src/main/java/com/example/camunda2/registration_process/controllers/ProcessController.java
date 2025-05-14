@@ -33,7 +33,7 @@ public class ProcessController {
     }
 
     @PostMapping("/start")
-    @PreAuthorize("hasRole('user')")
+    @PreAuthorize("hasRole('Default user role')")
     @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {})
     public ResponseEntity<ProcessInstanceEvent> startProcess(@RequestBody ProcessRequest request) {
         ProcessInstanceEvent processInstance = processService.startLoanApplication(request);

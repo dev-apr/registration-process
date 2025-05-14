@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       const tokenResponse = await axios.post('/auth/realms/camunda-platform/protocol/openid-connect/token', 
         new URLSearchParams({
           'client_id': 'camunda-app',
-          'client_secret': 'tI4bSYrju97cT1T1eEmoFyjug8hRMPft',
+          'client_secret': 'gW9KIdJPCgRhzRpraJHEF9YTvk4urw6z',
           'grant_type': 'password',
           'username': username,
           'password': password,
