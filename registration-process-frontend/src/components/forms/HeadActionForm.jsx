@@ -8,8 +8,6 @@ import './FormStyles.css';
  */
 export const HeadActionForm = ({ task, variables, onComplete }) => {
   const [formData, setFormData] = useState({
-    headDecision: variables?.headDecision || 'approved',
-    sameDecision: variables?.sameDecision || false,
     headComments: variables?.headComments || ''
   });
   const [submitting, setSubmitting] = useState(false);
@@ -21,8 +19,6 @@ export const HeadActionForm = ({ task, variables, onComplete }) => {
     if (variables && Object.keys(variables).length > 0) {
       setFormData(prevData => ({
         ...prevData,
-        headDecision: variables.headDecision || 'approved',
-        sameDecision: variables.sameDecision || false,
         headComments: variables.headComments || ''
       }));
     }
@@ -88,12 +84,18 @@ export const HeadActionForm = ({ task, variables, onComplete }) => {
     }
   };
 
-  // Head decision options
-  const decisionOptions = [
-    { value: 'approved', label: 'Approve' },
-    { value: 'rejected', label: 'Reject' },
-    { value: 'escalate', label: 'Escalate to Higher Management' }
-  ];
+  // Get decision status message
+  const getDecisionStatusMessage = () => {
+    if (!variables.legalDecision || !variables.financeDecision) {
+      return "Missing decisions from legal or finance";
+    }
+    
+    if (variables.sameDecision) {
+      return `Legal and Finance made the same decision: ${variables.legalDecision}`;
+    } else {
+      return `Legal (${variables.legalDecision}) and Finance (${variables.financeDecision}) made different decisions`;
+    }
+  };
 
   // Define form sections
   const formSections = [
@@ -131,9 +133,29 @@ export const HeadActionForm = ({ task, variables, onComplete }) => {
       title: 'Previous Assessments',
       content: (
         <>
+          <div className="form-group">
+            <label>Decision Status</label>
+            <div className={`alert ${variables.sameDecision ? 'alert-success' : 'alert-warning'}`}>
+              {getDecisionStatusMessage()}
+            </div>
+          </div>
+          
+          {variables.legalDecision && (
+            <div className="form-group">
+              <label htmlFor="legalDecision">Legal Decision</label>
+              <input
+                type="text"
+                id="legalDecision"
+                value={variables.legalDecision}
+                readOnly
+                className="form-control"
+              />
+            </div>
+          )}
+          
           {variables.legalComments && (
             <div className="form-group">
-              <label htmlFor="legalComments">Legal Assessment</label>
+              <label htmlFor="legalComments">Legal Comments</label>
               <textarea
                 id="legalComments"
                 name="legalComments"
@@ -145,9 +167,22 @@ export const HeadActionForm = ({ task, variables, onComplete }) => {
             </div>
           )}
           
+          {variables.financeDecision && (
+            <div className="form-group">
+              <label htmlFor="financeDecision">Finance Decision</label>
+              <input
+                type="text"
+                id="financeDecision"
+                value={variables.financeDecision}
+                readOnly
+                className="form-control"
+              />
+            </div>
+          )}
+          
           {variables.financeComments && (
             <div className="form-group">
-              <label htmlFor="financeComments">Financial Assessment</label>
+              <label htmlFor="financeComments">Finance Comments</label>
               <textarea
                 id="financeComments"
                 name="financeComments"
@@ -162,35 +197,13 @@ export const HeadActionForm = ({ task, variables, onComplete }) => {
       )
     },
     {
-      title: 'Final Decision',
+      title: 'Final Approval',
       content: (
         <>
-          <FormField
-            label="Your Decision:"
-            id="headDecision"
-            name="headDecision"
-            type="radio"
-            value={formData.headDecision}
-            onChange={handleChange}
-            options={decisionOptions}
-          />
-          
-          <div className="form-check" style={{ marginBottom: '15px', paddingLeft: '25px', position: 'relative' }}>
-            <input
-              type="checkbox"
-              id="sameDecision"
-              name="sameDecision"
-              checked={formData.sameDecision || false}
-              onChange={handleChange}
-              style={{
-                position: 'absolute',
-                left: '0',
-                top: '3px'
-              }}
-            />
-            <label htmlFor="sameDecision" style={{ marginBottom: '0' }}>
-              I agree with both legal and financial assessments
-            </label>
+          <div className="form-group">
+            <p className="alert alert-info">
+              Review the legal and finance decisions above and provide your comments before completing the task.
+            </p>
           </div>
           
           <FormField
@@ -198,7 +211,7 @@ export const HeadActionForm = ({ task, variables, onComplete }) => {
             id="headComments"
             name="headComments"
             type="textarea"
-            value={formData.headComments}
+            value={formData.headComments || ''}
             onChange={handleChange}
             placeholder="Enter your comments here..."
             rows={4}

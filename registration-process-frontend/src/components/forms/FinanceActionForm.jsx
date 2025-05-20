@@ -8,9 +8,7 @@ import './FormStyles.css';
  */
 export const FinanceActionForm = ({ task, variables, onComplete }) => {
   const [formData, setFormData] = useState({
-    budgetImpact: variables?.budgetImpact || '',
-    financeDecision: variables?.financeDecision || 'approved',
-    financialImpact: variables?.financialImpact || 'low',
+    financeDecision: variables?.financeDecision || 'class1',
     financeComments: variables?.financeComments || ''
   });
   const [submitting, setSubmitting] = useState(false);
@@ -22,9 +20,7 @@ export const FinanceActionForm = ({ task, variables, onComplete }) => {
     if (variables && Object.keys(variables).length > 0) {
       setFormData(prevData => ({
         ...prevData,
-        budgetImpact: variables.budgetImpact || '',
-        financeDecision: variables.financeDecision || 'approved',
-        financialImpact: variables.financialImpact || 'low',
+        financeDecision: variables.financeDecision || 'class1',
         financeComments: variables.financeComments || ''
       }));
     }
@@ -68,11 +64,22 @@ export const FinanceActionForm = ({ task, variables, onComplete }) => {
       setSubmitting(true);
       setError(null);
       
+      // Check if legal decision exists and compare with finance decision
+      const sameDecision = variables.legalDecision && 
+                          variables.legalDecision === formData.financeDecision;
+      
+      // Add sameDecision to the form data if legal has already made a decision
+      const submissionData = {
+        ...formData,
+        // Only set sameDecision if legal has already made a decision
+        ...(variables.legalDecision && { sameDecision })
+      };
+      
       // Log the form data being sent to the backend
-      console.log('Submitting task with data:', formData);
+      console.log('Submitting task with data:', submissionData);
       
       // Send the form data to the backend
-      await taskApi.completeTask(task.id, formData);
+      await taskApi.completeTask(task.id, submissionData);
       
       setSuccess('Task completed successfully');
       
@@ -92,16 +99,9 @@ export const FinanceActionForm = ({ task, variables, onComplete }) => {
 
   // Finance decision options
   const decisionOptions = [
-    { value: 'approved', label: 'Financially Approved' },
-    { value: 'rejected', label: 'Financially Rejected' },
-    { value: 'needsReview', label: 'Needs Further Financial Review' }
-  ];
-
-  // Financial impact options
-  const impactOptions = [
-    { value: 'low', label: 'Low Financial Impact' },
-    { value: 'medium', label: 'Medium Financial Impact' },
-    { value: 'high', label: 'High Financial Impact' }
+    { value: 'class1', label: 'Class 1' },
+    { value: 'class2', label: 'Class 2' },
+    { value: 'class3', label: 'Class 3' }
   ];
 
   // Define form sections
@@ -147,6 +147,20 @@ export const FinanceActionForm = ({ task, variables, onComplete }) => {
               />
             </div>
           )}
+          
+          {variables.legalComments && (
+            <div className="form-group">
+              <label htmlFor="legalComments">Legal Assessment</label>
+              <textarea
+                id="legalComments"
+                name="legalComments"
+                value={variables.legalComments}
+                readOnly
+                rows={4}
+                className="form-control"
+              />
+            </div>
+          )}
         </>
       )
     },
@@ -155,33 +169,13 @@ export const FinanceActionForm = ({ task, variables, onComplete }) => {
       content: (
         <>
           <FormField
-            label="Budget Impact ($)"
-            id="budgetImpact"
-            name="budgetImpact"
-            type="number"
-            value={formData.budgetImpact}
-            onChange={handleChange}
-            required={true}
-          />
-          
-          <FormField
             label="Financial Decision:"
             id="financeDecision"
             name="financeDecision"
-            type="radio"
+            type="select"
             value={formData.financeDecision}
             onChange={handleChange}
             options={decisionOptions}
-          />
-          
-          <FormField
-            label="Financial Impact:"
-            id="financialImpact"
-            name="financialImpact"
-            type="radio"
-            value={formData.financialImpact}
-            onChange={handleChange}
-            options={impactOptions}
           />
           
           <FormField
@@ -189,7 +183,7 @@ export const FinanceActionForm = ({ task, variables, onComplete }) => {
             id="financeComments"
             name="financeComments"
             type="textarea"
-            value={formData.financeComments}
+            value={formData.financeComments || ''}
             onChange={handleChange}
             placeholder="Enter your financial assessment here..."
             rows={4}

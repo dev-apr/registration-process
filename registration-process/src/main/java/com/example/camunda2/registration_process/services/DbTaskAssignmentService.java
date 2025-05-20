@@ -4,16 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.camunda.tasklist.CamundaTaskListClient;
+import io.camunda.tasklist.dto.Task;
 import io.camunda.tasklist.exception.TaskListException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Service for assigning tasks using database-backed round-robin assignment
  */
 @Service
 public class DbTaskAssignmentService {
+    private static final Logger LOGGER = Logger.getLogger(DbTaskAssignmentService.class.getName());
 
     private final CamundaTaskListClient taskListClient;
     private final RoundRobinAssignmentService roundRobinService;
@@ -35,5 +38,33 @@ public class DbTaskAssignmentService {
             throw new TaskListException("No users found for role: " + role);
         }
         taskListClient.claim(taskId, user);
+        LOGGER.info("Assigned task " + taskId + " to user " + user + " from role " + role);
+    }
+    
+    /**
+     * Assign a task to a user who is in both the functional group and the committee
+     */
+    public void assignTaskToRoleAndCommittee(String taskId, String role, String committee) throws TaskListException {
+        String user = roundRobinService.getNextUserInGroupAndCommittee(role, committee);
+        
+        if (user == null) {
+            LOGGER.warning("No users found in both " + role + " and " + committee + ". Falling back to role-only assignment.");
+            user = roundRobinService.getNextUserForRole(role);
+            
+            if (user == null) {
+                throw new TaskListException("No users found for role: " + role);
+            }
+        }
+        
+        taskListClient.claim(taskId, user);
+        LOGGER.info("Assigned task " + taskId + " to user " + user + " from role " + role + " and committee " + committee);
+    }
+    
+    /**
+     * Get the process instance ID for a task
+     */
+    public String getProcessInstanceId(String taskId) throws TaskListException {
+        Task task = taskListClient.getTask(taskId);
+        return task.getProcessInstanceKey();
     }
 }

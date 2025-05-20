@@ -8,8 +8,7 @@ import './FormStyles.css';
  */
 export const LegalActionForm = ({ task, variables, onComplete }) => {
   const [formData, setFormData] = useState({
-    legalDecision: variables?.legalDecision || 'compliant',
-    legalRiskLevel: variables?.legalRiskLevel || 'low',
+    legalDecision: variables?.legalDecision || 'class1',
     legalComments: variables?.legalComments || ''
   });
   const [submitting, setSubmitting] = useState(false);
@@ -21,8 +20,7 @@ export const LegalActionForm = ({ task, variables, onComplete }) => {
     if (variables && Object.keys(variables).length > 0) {
       setFormData(prevData => ({
         ...prevData,
-        legalDecision: variables.legalDecision || 'compliant',
-        legalRiskLevel: variables.legalRiskLevel || 'low',
+        legalDecision: variables.legalDecision || 'class1',
         legalComments: variables.legalComments || ''
       }));
     }
@@ -66,11 +64,22 @@ export const LegalActionForm = ({ task, variables, onComplete }) => {
       setSubmitting(true);
       setError(null);
       
+      // Check if finance decision exists and compare with legal decision
+      const sameDecision = variables.financeDecision && 
+                          variables.financeDecision === formData.legalDecision;
+      
+      // Add sameDecision to the form data if finance has already made a decision
+      const submissionData = {
+        ...formData,
+        // Only set sameDecision if finance has already made a decision
+        ...(variables.financeDecision && { sameDecision })
+      };
+      
       // Log the form data being sent to the backend
-      console.log('Submitting task with data:', formData);
+      console.log('Submitting task with data:', submissionData);
       
       // Send the form data to the backend
-      await taskApi.completeTask(task.id, formData);
+      await taskApi.completeTask(task.id, submissionData);
       
       setSuccess('Task completed successfully');
       
@@ -90,16 +99,9 @@ export const LegalActionForm = ({ task, variables, onComplete }) => {
 
   // Legal decision options
   const decisionOptions = [
-    { value: 'compliant', label: 'Compliant with regulations' },
-    { value: 'nonCompliant', label: 'Non-compliant with regulations' },
-    { value: 'needsInvestigation', label: 'Needs further investigation' }
-  ];
-
-  // Risk level options
-  const riskOptions = [
-    { value: 'low', label: 'Low Risk' },
-    { value: 'medium', label: 'Medium Risk' },
-    { value: 'high', label: 'High Risk' }
+    { value: 'class1', label: 'Class 1' },
+    { value: 'class2', label: 'Class 2' },
+    { value: 'class3', label: 'Class 3' }
   ];
 
   // Define form sections
@@ -153,23 +155,13 @@ export const LegalActionForm = ({ task, variables, onComplete }) => {
       content: (
         <>
           <FormField
-            label="Legal Compliance:"
+            label="Legal Decision:"
             id="legalDecision"
             name="legalDecision"
-            type="radio"
+            type="select"
             value={formData.legalDecision}
             onChange={handleChange}
             options={decisionOptions}
-          />
-          
-          <FormField
-            label="Risk Level:"
-            id="legalRiskLevel"
-            name="legalRiskLevel"
-            type="radio"
-            value={formData.legalRiskLevel}
-            onChange={handleChange}
-            options={riskOptions}
           />
           
           <FormField
