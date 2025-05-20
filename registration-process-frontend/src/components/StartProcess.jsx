@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { processApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
@@ -22,15 +21,6 @@ export default function StartProcess() {
 
   const startProcess = async () => {
     // Validate input
-    // if (!wage || isNaN(wage) || parseInt(wage) <= 0) {
-    //   setError('Please enter a valid wage amount (positive number)');
-    //   return;
-    // }
-    
-    // if (!requestDate) {
-    //   setError('Please select a request date');
-    //   return;
-    // }
     
     setLoading(true);
     setError('');

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { taskApi, processApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { TaskFormSelector } from './TaskFormSelector';
 
 export default function TaskDetail() {
   const { taskId } = useParams();
@@ -103,24 +104,6 @@ export default function TaskDetail() {
     }
   };
 
-  const handleCompleteTask = async () => {
-    try {
-      await taskApi.completeTask(taskId, variables);
-      setSuccess('Task completed successfully');
-      setTimeout(() => navigate('/tasks'), 1500);
-    } catch (err) {
-      console.error('Error completing task:', err);
-      setError('Failed to complete task. Please try again.');
-    }
-  };
-
-  const handleInputChange = (key, value) => {
-    setVariables(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  };
-  
   // Helper function to find variable value from different sources
   const findVariableValue = (name, defaultValue = 'Not available') => {
     // First check in task variables from the dedicated endpoint
@@ -136,7 +119,7 @@ export default function TaskDetail() {
     }
     
     // Finally check in task variables from the task object
-    if (task.variables) {
+    if (task && task.variables) {
       const taskObjVar = Object.entries(task.variables).find(([key]) => key === name);
       if (taskObjVar) {
         const [_, variable] = taskObjVar;
@@ -145,6 +128,33 @@ export default function TaskDetail() {
     }
     
     return defaultValue;
+  };
+
+  // Prepare combined variables from all sources
+  const getCombinedVariables = () => {
+    const combined = { ...variables };
+    
+    // Add variables from taskVariables array
+    taskVariables.forEach(variable => {
+      if (variable.name && variable.value !== undefined) {
+        combined[variable.name] = variable.value;
+      }
+    });
+    
+    // Add variables from process variables
+    Object.entries(processVariables).forEach(([key, value]) => {
+      if (!combined[key]) {
+        combined[key] = typeof value === 'object' && value.value !== undefined ? value.value : value;
+      }
+    });
+    
+    return combined;
+  };
+
+  // Handle task completion via the form
+  const handleTaskComplete = () => {
+    setSuccess('Task completed successfully');
+    setTimeout(() => navigate('/tasks'), 1500);
   };
 
   if (loading) {
@@ -159,26 +169,32 @@ export default function TaskDetail() {
     return <p>Task not found</p>;
   }
 
+  // Only show the form if the user is assigned to this task or is admin
+  const canCompleteTask = task.assignee === user?.username || user?.roles?.includes('admin');
+
   return (
     <div className="task-detail">
-      <h2>{task.name}</h2>
-
       {success && <div className="success message">{success}</div>}
 
-      <div>
+      <div style={{ marginBottom: '20px' }}>
         <p><strong>Created:</strong> {new Date(task.creationDate).toLocaleString()}</p>
         <p><strong>Process Instance:</strong> {task.processInstanceKey}</p>
         <p><strong>Assignee:</strong> {task.assignee || 'Unassigned'}</p>
       </div>
 
-      
-        
-        {/* Read-only Task Variables Section */}
-        <div style={{ marginTop: '20px' }}>
-          <h4>Additional Task Information</h4>
-          
+      {canCompleteTask ? (
+        // Show the appropriate form based on task type
+        <TaskFormSelector 
+          task={task} 
+          variables={getCombinedVariables()} 
+          onComplete={handleTaskComplete} 
+        />
+      ) : (
+        // Show read-only task information
+        <div>
+          <h3>Task Information</h3>
           {taskVariablesLoading ? (
-            <p>Loading additional task information...</p>
+            <p>Loading task information...</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {/* Wage Field */}
@@ -191,10 +207,7 @@ export default function TaskDetail() {
                   id="wage"
                   readOnly
                   value={(() => {
-                    const wageValue = findVariableValue('wage') || 
-                                     findVariableValue('salary') || 
-                                     findVariableValue('income');
-                    
+                    const wageValue = findVariableValue('wage')
                     if (wageValue && !isNaN(parseFloat(wageValue))) {
                       // Format as currency if it's a number
                       return new Intl.NumberFormat('en-US', { 
@@ -226,9 +239,7 @@ export default function TaskDetail() {
                   readOnly
                   value={(() => {
                     // Try different possible variable names for the request date
-                    const dateValue = findVariableValue('requestDate', null) || 
-                                     findVariableValue('request_date', null) || 
-                                     findVariableValue('date', null);
+                    const dateValue = findVariableValue('requestDate', null)
                     
                     if (dateValue) {
                       try {
@@ -252,25 +263,9 @@ export default function TaskDetail() {
             </div>
           )}
         </div>
+      )}
 
       <div className="task-actions" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-        {/* Only show complete button if user is assigned to this task or is admin */}
-        {(task.assignee === user?.username || user?.roles?.includes('admin')) && (
-          <button
-            onClick={handleCompleteTask}
-            style={{
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              padding: '10px 15px',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Complete Task
-          </button>
-        )}
-
         {/* Only show unclaim button if task is assigned and user is admin or the assignee */}
         {task.assignee && (task.assignee === user?.username || user?.roles?.includes('admin')) && (
           <button

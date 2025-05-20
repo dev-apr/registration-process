@@ -19,16 +19,6 @@ keycloak:
     url: http://localhost:18080/auth/realms/master/protocol/openid-connect/token
     username: admin
     password: admin
-  groups:
-    admin: d08fb26e-9e37-4b60-aab4-ac7b71ebda02
-    validator: 7dd2c4e0-b66f-4c39-9263-6ce9b4251c12
-    financial-controller: 7927b3fb-f6ab-41ae-a99d-83ae4183799e
-    c1-finance: fb0a070d-dd65-4db4-bf21-30e3bafbc83c
-    c1-head: cef3dfc0-1b2b-4d9c-88a5-123977562484
-    c1-legal: 0e957d56-fa00-4565-aab1-0423ded2611f
-    c2-finance: 3292b6e1-41b7-44e2-9620-ea99bfa0126e
-    c2-head: fd372adb-0c20-4c0a-ba87-b316d485881f
-    c2-legal: 5c7c146c-8981-46aa-87b0-48a54b32face
 
 tasklistUrl: http://localhost:8082
 operateUrl: http://localhost:8081
