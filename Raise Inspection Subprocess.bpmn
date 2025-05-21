@@ -26,7 +26,7 @@
       <bpmn:outgoing>Flow_0bsyifb</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:sequenceFlow id="Flow_0gnvlus" name="No" sourceRef="Gateway_0ccorne" targetRef="headAction">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=sameDecision = false</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=legalDecision != financeDecision</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:exclusiveGateway id="Gateway_0ccorne" name="Same decision?">
       <bpmn:incoming>Flow_1tpt4jw</bpmn:incoming>
@@ -43,7 +43,7 @@
       <bpmn:outgoing>Flow_11h1plr</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1t01wnd" name="Yes" sourceRef="Gateway_0ccorne" targetRef="Gateway_1o2zthq">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=sameDecision = true</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=legalDecision = financeDecision</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0ksu8bj" name="Yes" sourceRef="Gateway_1uoiiib" targetRef="assignCommittee">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=violationIndicator = true</bpmn:conditionExpression>

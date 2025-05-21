@@ -38,7 +38,6 @@ public class TaskPollingService {
     private final CamundaTaskListClient taskListClient;
     private final DbTaskAssignmentService taskAssignmentService;
     private final RoundRobinAssignmentService roundRobinService;
-    private final ProcessVariableService processVariableService;
     private final ZeebeClient zeebeClient;
     
     private JobWorker committeeAssignmentWorker;
@@ -56,7 +55,6 @@ public class TaskPollingService {
         this.taskListClient = taskListClient;
         this.taskAssignmentService = taskAssignmentService;
         this.roundRobinService = roundRobinService;
-        this.processVariableService = processVariableService;
         this.zeebeClient = zeebeClient;
         LOGGER.info("TaskPollingService initialized");
     }

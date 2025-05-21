@@ -154,6 +154,14 @@ export default function TaskDetail() {
   // Handle task completion via the form
   const handleTaskComplete = () => {
     setSuccess('Task completed successfully');
+    
+    // Mark this task as completed by adding it to the completedTaskIds in localStorage
+    const completedTaskIds = JSON.parse(localStorage.getItem('completedTaskIds') || '[]');
+    if (!completedTaskIds.includes(taskId)) {
+      completedTaskIds.push(taskId);
+      localStorage.setItem('completedTaskIds', JSON.stringify(completedTaskIds));
+    }
+    
     setTimeout(() => navigate('/tasks'), 1500);
   };
 

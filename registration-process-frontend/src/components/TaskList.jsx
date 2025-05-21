@@ -12,6 +12,18 @@ export default function TaskList() {
   // const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
+  // Keep track of completed tasks to filter them out
+  const [completedTaskIds, setCompletedTaskIds] = useState(() => {
+    // Initialize from localStorage if available
+    const saved = localStorage.getItem('completedTaskIds');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Save completed task IDs to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('completedTaskIds', JSON.stringify(completedTaskIds));
+  }, [completedTaskIds]);
+
   useEffect(() => {
     const fetchTasks = async () => {
       if (!user?.username) return;
@@ -69,23 +81,27 @@ export default function TaskList() {
           return;
         }
 
-        // Handle tasks array
+        // Extract tasks from the response
+        let extractedTasks = [];
         if (response.data && Array.isArray(response.data.tasks)) {
-          setTasks(response.data.tasks);
-          console.log('Tasks set:', response.data.tasks);
+          extractedTasks = response.data.tasks;
         } else if (response.data && response.data.tasks === null) {
           console.warn('Tasks is null in response');
-          setTasks([]);
+          extractedTasks = [];
         } else if (response.data) {
           // Try to extract tasks from the response in a different way
           console.warn('Trying to extract tasks from response in a different format');
-          const extractedTasks = response.data.items || response.data.content || [];
-          setTasks(extractedTasks);
-          console.log('Extracted tasks:', extractedTasks);
-        } else {
-          console.warn('No data found in response');
-          setTasks([]);
+          extractedTasks = response.data.items || response.data.content || [];
         }
+
+        // Filter out completed tasks
+        const filteredTasks = extractedTasks.filter(task => {
+          // Filter out tasks that are in our completedTaskIds list
+          return !completedTaskIds.includes(task.id);
+        });
+
+        console.log('Filtered tasks (excluding completed):', filteredTasks);
+        setTasks(filteredTasks);
       } catch (err) {
         console.error('Error in task fetching process:', err);
         if (err.response) {
@@ -104,7 +120,7 @@ export default function TaskList() {
     };
 
     fetchTasks();
-  }, [user, viewMode]);
+  }, [user, viewMode, completedTaskIds]);
 
   const handleClaimTask = async (taskId) => {
     try {
@@ -113,10 +129,18 @@ export default function TaskList() {
       // Refresh task list after claiming
       if (viewMode === 'unassigned') {
         const response = await taskApi.getUnassignedTasks();
-        setTasks(response.data.tasks || response.data.items || []);
+        const extractedTasks = response.data.tasks || response.data.items || [];
+        
+        // Filter out completed tasks
+        const filteredTasks = extractedTasks.filter(task => !completedTaskIds.includes(task.id));
+        setTasks(filteredTasks);
       } else if (viewMode === 'all') {
         const response = await taskApi.getAllTasks();
-        setTasks(response.data.tasks || response.data.items || []);
+        const extractedTasks = response.data.tasks || response.data.items || [];
+        
+        // Filter out completed tasks
+        const filteredTasks = extractedTasks.filter(task => !completedTaskIds.includes(task.id));
+        setTasks(filteredTasks);
       }
     } catch (err) {
       console.error('Error claiming task:', err);
@@ -124,23 +148,18 @@ export default function TaskList() {
     }
   };
 
+  // Function to mark a task as completed
+  const markTaskAsCompleted = (taskId) => {
+    setCompletedTaskIds(prev => [...prev, taskId]);
+  };
+
   const setView = (mode) => {
     console.log('Setting view mode to:', mode);
     setViewMode(mode);
   };
 
-  // const getViewTitle = () => {
-  //   switch (viewMode) {
-  //     case 'unassigned': return 'Unassigned Tasks';
-  //     case 'all': return 'All Tasks (Admin View)';
-  //     default: return 'My Tasks';
-  //   }
-  // };
-
   return (
     <div>
-      {/* <h2>{getViewTitle()}</h2> */}
-
       {/* View selection buttons */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <button
@@ -248,7 +267,14 @@ export default function TaskList() {
                     Claim Task
                   </button>
                 ) : (
-                  <Link to={`/task/${task.id}`} style={{ textDecoration: 'none' }}>
+                  <Link 
+                    to={`/task/${task.id}`} 
+                    style={{ textDecoration: 'none' }}
+                    onClick={() => {
+                      // Store the current task ID so we can mark it as completed when returning
+                      localStorage.setItem('currentTaskId', task.id);
+                    }}
+                  >
                     <button
                       style={{
                         backgroundColor: '#007bff',
